@@ -9,8 +9,13 @@ import (
 )
 
 func main() {
-	if len(os.Args) <= 1 {
-		fmt.Printf("Input string missing!\n")
+	results := checkCommonWords(os.Args)
+	fmt.Printf("Following words are not in the 1000 most common list:\n%s\n", results)
+}
+
+func checkCommonWords(args []string) string {
+	if len(args) <= 1 {
+		fmt.Printf("Input is missing. Either pass string or use '-p' to pass file with payload\n")
 		os.Exit(0)
 	}
 
@@ -39,14 +44,25 @@ func main() {
 		commonWordsMap[s] = s
 	}
 
-	input := strings.Fields(os.Args[1])
+	input := args[1]
+
+	var inputWords []string
+	if strings.HasPrefix(input, "-p") {
+		if len(args) <= 2 {
+			fmt.Println("Expecing a file with -p")
+			os.Exit(0)
+		}
+		inputWords = openPayload(args[2])
+	} else {
+		inputWords = strings.Fields(input)
+	}
+
 	wordsMap := make(map[string]string)
-	for _, s := range input {
+	for _, s := range inputWords {
 		wordsMap[s] = strings.ToLower(s)
 	}
 
-	result := strings.Join(difference(wordsMap, commonWordsMap), ", ")
-	fmt.Printf("Following words are not in the 1000 most common list:\n%s\n", result)
+	return strings.Join(difference(wordsMap, commonWordsMap), ", ")
 }
 
 func difference(map1, map2 map[string]string) []string {
@@ -60,4 +76,16 @@ func difference(map1, map2 map[string]string) []string {
 	}
 
 	return diff
+}
+
+func openPayload(filePath string) []string {
+	file, err := os.ReadFile(filePath)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	words := strings.Fields(string(file))
+	return words
 }
