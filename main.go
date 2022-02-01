@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -75,6 +76,7 @@ func difference(map1, map2 map[string]string) []string {
 		}
 	}
 
+	sort.Strings(diff)
 	return diff
 }
 
